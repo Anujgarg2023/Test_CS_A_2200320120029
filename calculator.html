@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Currency Converter</title>
+</head>
+<body>
+<h2>Currency Converter</h2>
+Amount:<input type="number" id="amount" placeholder="Enter amount" required>
+<select id="fromCurrency"></select><br>
+Convert<select id="toCurrency"></select><br><br>
+<button id="convertButton">Convert</button>
+<h3 id="result"></h3>
+
+<script>
+    const apiUrl = 'https://api.exchangerate-api.com/v4/latest/USD';
+
+    async function fetchExchangeRates() {
+        const response = await fetch(apiUrl);
+        const rates = (await response.json()).rates;
+
+        for (const currency in rates) {
+            const optionFrom = new Option(currency, currency);
+            const optionTo = new Option(currency, currency);
+            document.getElementById('fromCurrency').add(optionFrom);
+            document.getElementById('toCurrency').add(optionTo);
+        }
+    }
+
+    async function convertCurrency() {
+        const amount = parseFloat(document.getElementById('amount').value);
+        const fromCurrency = document.getElementById('fromCurrency').value;
+        const toCurrency = document.getElementById('toCurrency').value;
+
+        const rates = (await (await fetch(apiUrl)).json()).rates;
+        const convertedAmount = fromCurrency !== 'USD' 
+            ? (amount / rates[fromCurrency]) * rates[toCurrency] 
+            : amount * rates[toCurrency];
+
+        document.getElementById('result').textContent = `${amount} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+    }
+
+    document.getElementById('convertButton').addEventListener('click', convertCurrency);
+    fetchExchangeRates();
+</script>
+
+</body>
+</html>
